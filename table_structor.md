@@ -22,35 +22,35 @@ Note
 
 ## 常用操作
 
-Link preload
+## 数据库
 
-bash mysql.server start
-Mysql -uroot
+1. 启动：bash mysql.server start
+2. 用户登录：Mysql -u root
+3. 连接远程数据库服务器：mysql  - D 所选择数据库名  -h 主机名 -u 用户名 -p 密码
+4. 查看：show databases
+5. 创建建：create database name
+6. 启用：use databaseName
+7. 删除：Drop database databaseName
+8. 备份：mysqldump -u root -p 数据库名>url/xxx.sql
+9. 恢复：mysql -u root 新数据库名<xxx.sql
+10. 执行外部sql：mysql -u root -p --source xxx.sql
 
-表：
-Show tables;
-Create table Tname (fieldName type description , fieldName…)
-Insert into tableName ([fieldName, …]) values (v1,…)
-Drop table Tname
-Delete from Tname 。。。
-Alter table tableName rename newTableName
+## 表
+
+- 基础操作
+1. 查看：Show tables;
+2. 创建：Create table Tname (fieldName type description , fieldName…)
+3. 插入：Insert into tableName ([fieldName, …]) values (v1,…)
+4. 删除：Drop table Tname 或 Delete from Tname 。。。
+5. 修改：Alter table tableName rename newTableName
+6. 通过脚本文件创建表：mysql -D databaseName -u userName -p < createtable.sql
+7. 创建时字段描述：类型 [长度] 索引 自增 默认值(int unsigned primary key auto_increment not null)
 
 
-修改表结构：
-alter table tableName add fieldName  type after fieldName
-
-alter table tableName change newFieldName NewType
-
-Alter table tableName drop fieldName
-
-
-
-
-通过文件创建：
-mysql -D databaseName -u userName -p < createtable.sql
-
-字段描述的关键字：
-not null, auto_increment, primary key,
+- 修改表结构
+1. 添加字段：alter table tableName add fieldName  type after fieldName
+2. 修改字段名：alter table tableName change newFieldName NewType
+3. 删除字段：Alter table tableName drop fieldName
 
 常用常量：
 NULL
@@ -64,32 +64,17 @@ update tableName set  fieldName = v  where 运算
 删除：
 delete from tableName where 运算
 
-数据库：
-查：show databases
-建：create database name 。。。
-用：use databaseName
-Drop database databaseName
+## 数据类型
 
-用户：
-create user ‘username’@‘ip’ by ‘password’
-Drop user username
-set password for’username’ = Password(‘new’)
-
-权限
-show grants for ‘username’
-
-远程数据库服务器：
-mysql  - D 所选择数据库名  -h 主机名 -u 用户名 -p 密码
-
-1. 数字类型
-整数: tinyint、smallint、mediumint、int、bigint
-浮点数: float、double、real、decimal
-2. 日期和时间: date、time、datetime、timestamp、year
-3. 字符串类型
-字符串: char、varchar
-文本: tinytext、text、mediumtext、longtext
-二进制(可用来存储图片、音乐等): tinyblob、blob、mediumblob、longblob
-
+- 数字类型
+  1. 整数: tinyint、smallint、mediumint、int、bigint
+  2. 浮点数: float、double、real、decimal
+- 日期和时间: date、time、datetime、timestamp、year
+- 字符串类型
+  1. 字符串: char、varchar
+  2. 文本: tinytext、text、mediumtext、longtext
+- 二进制(可用来存储图片、音乐等): tinyblob、blob、mediumblob、longblob
+- 对类型的描述：unsigned, signed
 
 ## 变量
 
@@ -117,7 +102,6 @@ mysql  - D 所选择数据库名  -h 主机名 -u 用户名 -p 密码
   4. 更新密码：update user set password = password('password') where user="username"
   5. delete from mysql.user where user="username"
 
-
 - 权限
   1. 权限分为：ALL PRIVILEGES、CREATE、ALTER、INSERT、UPDATE、DELETE、SELECT
   2. 创建用户并设置权限：grant 权限值, ... on 数据库名. to 'username'@'hostname' [identified by 'password']
@@ -131,6 +115,17 @@ mysql  - D 所选择数据库名  -h 主机名 -u 用户名 -p 密码
 GRANT ALL PRIVILEGES ON test.* TO 'semon'@'%' IDENTIFIED BY 'semon';
 GRANT CREATE ON test.* TO demon WITH GRANT OPTION;
 ```
+
+## 性能
+
+1. 开启时间监测：set profiling = 1;
+2. 查看检测结果：show profiles;
+
+## 索引：提高了查询速度，但降低更新表的速度，因更新时需要保存数据，同时保存索引文件，会占磁盘空间
+
+1. 创建：create index 索引名称 on 表名(字段名(长度))
+2. 查看：show index from 表名
+3. 删除：drop index 索引名 on 表名
 
 ## 函数/存储过程
 
@@ -163,3 +158,12 @@ GRANT CREATE ON test.* TO demon WITH GRANT OPTION;
   - 持久性：对已提交的事务，系统必须保证该事务对数据库的改变不被丢失
   - 事务提交：整个事务下的操作集全部有效
   - 事务回滚：整个事务下的操作集全部作废
+  - 脏读：一个事务将数据改变，但还未提交；此时另一个事务读取时读到的是新数据，而事务又将其回滚，此时事务再读取，发现数据又变回去了；而此前读到的变成的脏数据。(解决问题的方式：读已提交，可重复读)
+  - 不可复读：事务多次查询数据，因另一事务对数据的操作，导致查询数据结果不一致。(解决问题的方式：可重复读)
+  - 虚/幻读：事务读取值后对其更名，而另一事务又创建了此名称，而原事务再查询时发现未修改，产生了幻觉。(读未提交，读已提交)
+  - 读已提交：一个事务在写时，禁止其他事务读写，提交后才能被读取。
+  - 可重复读：一个事务在写时，禁止其他事务读写，一个事务在读取时，禁止其他事务写。
+  - 串行化：每次只能执行一个事务。
+  - mySQL：采用innodb为其默认引擎。insert, update, delete会触发事务；开启事务后，变更会维护到本地缓存中，而非物理表中。
+  - 使用：begin; 提交事务 comit; 回滚事务 rollback;
+  - 关闭默认事务提交：set [global] autocommit = 0;
