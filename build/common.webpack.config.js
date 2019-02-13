@@ -1,3 +1,6 @@
+import path from 'path';
+import pkg from '../package.json';
+const root_dir = path.resolve(__dirname, '..');
 const get_cur_dir = (...args)=>path.resolve(root_dir, ...args);  // 获取当前项目下的某个目录
 const isDebug = !process.argv.includes('--release');
 const isVerbose = process.argv.includes('--verbose');
@@ -9,25 +12,27 @@ const minimizeCssOptions = {
   discardComments: { removeAll: true },
 };
 
-// 多入口时，如果用html-webpack-tplugin，需要配置多个
+// 多入口时，如果用html-webpack-plugin，需要配置多个
 // 引入第三方库：webpack.ProvidePlugin暴露变量
 
-export default const config = {
-  module：{
+let config = {
+  context: root_dir,
+  mode: isDebug ? 'development' : 'production',
+  output: {
+    path: get_cur_dir('dist','public/assets'),
+    publicPath: '/assets/', // 按需加载 或 加载外部资源
+    filename: isDebug ? '[name].js' : '[name].[chunkhash:8].js',
+    chunkFilename: isDebug ? '[name].chunk.js' :'[name].[chunkhash:8].chunk.js', // 非入口文件
+    devtoolModuleFilenameTemplate: info => {
+      path.resolve(info.absoluteResourcePath).replace(/\\/g, '/');
+    }
+  },
+  resolve: {
+    modules: ['node_modules', 'src']
+  },
+  module: {
     strictExportPresence: true, // 缺少exports报错，而非警告
-    mode: isDebug ? 'development' : 'production',
-    output: {
-      path: get_cur_dir('dist'),
-      publicPath: '/assets/', // 按需加载 或 加载外部资源
-      filename: isDebug ? '[name].js' : '[name].[chunkhash:8].js',
-      chunkFilename: isDebug ? '[name].chunk.js' :'[name].[chunkhash:8].chunk.js', // 非入口文件
-      devtoolModuleFilenameTemplate: info => {
-        path.resolve(info.absoluteResourcePath).replace(/\\/g, '/');
-      }
-    },
-    resolve: {
-      modules: ['node_modules', 'src']
-    },
+    // 这个输出的是哪部分文件？
     rules: [
       // js相关文本
       {
@@ -151,10 +156,10 @@ export default const config = {
           name: staticAssetName
         }
       },
-      // todo
+      // todo 这个是为了解决什么问题？
       ...(isDebug ? [] : [{
         test: get_cur_dir('node_modules/react-deep-force-update/lib/index.js'),
-        load: 'null-loader'
+        loader: 'null-loader'
       }])
     ],
   },
@@ -178,3 +183,5 @@ export default const config = {
   },
   devtool: isDebug ? 'cheap-module-inline-source-map' : 'source-map',
 }
+
+export default config;

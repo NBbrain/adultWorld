@@ -56,6 +56,8 @@
     "babel-jest": "^23.0.1",
     "babel-loader": "^7.1.4",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.13",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
     "browser-sync": "^2.24.4",
     "chokidar": "^2.0.4",
     "css-loader": "^0.28.11",
@@ -120,7 +122,9 @@
     "webpack-node-externals": "^1.7.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "babel-node ./build/run start",
+    "render": "babel-node ./build/run render",
+    "runServer": "babel-node ./build/run runServer"
   },
   "repository": {
     "type": "git",

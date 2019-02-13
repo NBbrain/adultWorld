@@ -6,6 +6,8 @@ import nodeExternals from 'webpack-node-externals'; // 构建一个外部函数�
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'; // 模块分析
 import config from './common.webpack.config';
 import { resolve } from 'dns';
+import pkg from '../package.json';
+import overrideRules from './lib/overrideRules';
 
 
 const root_dir = path.resolve(__dirname, '..');
@@ -32,8 +34,8 @@ const clientConfig = {
     }),
     // 生成manifest.json文件，在服务端使用
     new webpackAssetsManifest({
-      // 生成的json----文件名，多页面南非要配置成数组
-      output: `${get_cur_dir(dist)}/asset-manifest.json`,
+      // 生成的json----文件名，多页面需要配置成数组
+      output: `${get_cur_dir('dist')}/asset-manifest.json`,
       writeToDisk: true,
       publicPath: true,
       // entry
@@ -41,20 +43,20 @@ const clientConfig = {
         if(key.toLowerCase().endsWith('.map')) return false;
         return {key, value};
       },
-      // ???
+      // 根据中间的chunk-manifest.json文件
       done: ({manifest, stats})=>{
-        const chunkFilename = `${get_cur_dir(dist)}/chunk-manifest.json`
+        const chunkFilename = `${get_cur_dir('dist')}/chunk-manifest.json`
         try{
+          // 获取非.map文件的路径
           const fileFilter = file => !file.endsWith('.map');
           const addPath = file => manifest.getPublicPath(file);
-          // ???
           const chunkFiles = stats.compilation.chunkGroups.reduce((acc, c)=>{
             // 定义属性
             acc[c.name] = [
               ...(acc[c.name] || []),
               c.chunks.reduce((files, cc) => [
                 ...files,
-                ...cc.files.filter(fileFilter).map(addPath);
+                ...cc.files.filter(fileFilter).map(addPath)
               ], [])
             ];
             return acc;
@@ -108,25 +110,29 @@ const serverConfig = {
   resolve: {
     ...config.resolve,
   },
-  // ???
+  // todo 改写了规则？？
   module: {
     ...config.module,
+    // 对rules执行最后的回调，为其添加额外的配置，为什么要这么实现？
     rules: overrideRules(config.module.rules, rule => {
       // babel-loader时，更新其preset配置
       if(rule.loader === 'babel-loader'){
         return {
-          ...rule.options,
-          presets: rule.options.presets.map(preset => preset[0] !== '@babel/preset-env' ? preset : [
-            '@babel/preset-env',
-            {
-              target: {
-                node: pkg.engins.node.match(/(\d+\.?)+/)[0],
-              },
-              modules: false,
-              useBuiltIns: false,
-              debug: false
-            }
-          ])
+          ...rule,
+          options: {
+            ...rule.options,
+            presets: rule.options.presets.map(preset => preset[0] !== '@babel/preset-env' ? preset : [
+              '@babel/preset-env',
+              {
+                target: {
+                  node: pkg.engines.node.match(/(\d+\.?)+/)[0],
+                },
+                modules: false,
+                useBuiltIns: false,
+                debug: false
+              }
+            ])
+          }
         }
       }
       if(rule.loader === 'file-loader' ||
@@ -140,9 +146,10 @@ const serverConfig = {
           },
         };
       }
+      return rule;
     })
   },
-  // ???
+  // 描述外部可访问的方式，从输出bundle中排除
   externals:[
     './chunk-manifest.json',
     './asset-manifest.json',
