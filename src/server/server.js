@@ -13,7 +13,10 @@ import config from './config';
 import passport from './passport';
 import router from '../router'
 
-// process.on('onhandleRejection')
+process.on('onhandleRejection', (reason, p)=>{
+  console.error('Unhandled Rejection at:', p, 'reason', reason);
+  process.exit(1);
+})
 
 global.navigator = global.navigator || {};
 global.navigator.userAgent = global.navigator.userAgent || 'all';
@@ -39,7 +42,7 @@ app.use(cookieParser())
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json())
 
-// 对请求身份进行验证，令牌是否有效
+// 验证指定http请求的JsonWebTokens的有效性
 app.use(expressJwt({
   // secret:
   credentialsRequired: false,
@@ -79,7 +82,7 @@ app.get('*', async(req, res, next)=>{
     }
 
     // todo 请求封装
-    const fetch = createFetch(nodeFetch, {});
+    // const fetch = createFetch(nodeFetch, {});
 
     const context = {
       insertCss,
@@ -95,11 +98,13 @@ app.get('*', async(req, res, next)=>{
     data.children = reactDOM.renderToString(
       <App context={context}>{route.component}</App>
     )
-    // todo
+    // chunks的作用 ?
     const scripts = new Set();
     const addChunk = chunk => {
       if(chunks[chunk]){
-
+        chunks[chunk].forEach(asset => scripts.add(asset));
+      } else if (__DEV__) {
+        throw new Error(`Chunk with name '${chunk}' cannot be found`);
       }
     }
     // 添加客户端渲染？收集script?
@@ -111,10 +116,8 @@ app.get('*', async(req, res, next)=>{
     data.app = {
       apiUrl: config.api.clientUrl
     }
-
-
     // 渲染整个页面HTML{styles, children, scripts}
-    const html = reactDOM.renderToStaticMarkup(<Html {...data}>);
+    const html = reactDOM.renderToStaticMarkup(<Html {...data}/>);
     res.status(route.status || 200);
     res.send(`<!doctype html>${html}`);
   }catch(err){
@@ -124,3 +127,43 @@ app.get('*', async(req, res, next)=>{
 
 const pe = new PrettyError();
 
+pe.skipNodeFiles();
+pe.skipPackage('express');
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(pe.render(err));
+  const html = ReactDOM.renderToStaticMarkup(
+    <Html
+      title="Internal Server Error"
+      description={err.message}
+      styles={[{ id: 'css', cssText: errorPageStyle._getCss() }]} // eslint-disable-line no-underscore-dangle
+    >
+      {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
+    </Html>,
+  );
+  res.status(err.status || 500);
+  res.send(`<!doctype html>${html}`);
+});
+
+//
+// Launch the server
+// -----------------------------------------------------------------------------
+const promise = models.sync().catch(err => console.error(err.stack));
+if (!module.hot) {
+  promise.then(() => {
+    app.listen(config.port, () => {
+      console.info(`The server is running at http://localhost:${config.port}/`);
+    });
+  });
+}
+
+//
+// Hot Module Replacement
+// -----------------------------------------------------------------------------
+if (module.hot) {
+  app.hot = module.hot;
+  module.hot.accept('./router');
+}
+
+export default app;

@@ -19,7 +19,6 @@ const watchOptions = {
   // Decrease CPU or memory usage in some file systems
   // ignored: /node_modules/,
 };
-
 function createCompilationPromise(name, compiler, config) {
   return new Promise((resolve, reject) => {
     let timeStart = new Date();
@@ -195,7 +194,6 @@ async function start() {
       });
     }
   });
-
   // Wait until both client-side and server-side bundles are ready
   await clientPromise;
   await serverPromise;
@@ -215,12 +213,12 @@ async function start() {
     browserSync.create().init(
       {
         // https://www.browsersync.io/docs/options
-        server: 'src/server.js',
+        server: 'src/server/server.js',
         middleware: [server],
         open: !process.argv.includes('--silent'),
         ...(isDebug ? {} : { notify: false, ui: false }),
       },
-      (error, bs) => (error ? reject(error) : resolve(bs)),
+      (error, bs) => {return (error ? reject(error) : resolve(bs))},
     ),
   );
 

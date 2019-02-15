@@ -25,7 +25,7 @@ const clientConfig = {
   name: 'client',
   target: 'web',
   entry: {
-    server: ['@babel/polyfill', '../src/fe/client.js']
+    client: ['@babel/polyfill', '../src/fe/client.js']
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -75,12 +75,13 @@ const clientConfig = {
   // optimization.splitChunks 和 optimization.runtimeChunk 默认生成共享的代码块；一切皆模块，一个模块对应一个文件
   // chunk 代码块，一个chunk由多个模块组成
   // webpack-dev-server开发时的一个服务器，把打包的文件全部放入mwdhk，可以热更新替换。
+  // 缓存组：将node_modules中的模块拆分一个vendors的代码块，也可以对重复引用的模块再提取
   optimization: {
     splitChunks: {
       cacheGroups: {
-        commons: {
-          chinks: 'initial',
-          test: /[\\/]node_modules[\\/]/,
+        vendors: {
+          chunks: 'initial',
+          test: /\/node_modules\//,
           name: 'vendors',
         }
       }
@@ -98,7 +99,7 @@ const serverConfig = {
   name: 'server',
   target: 'node',
   entry: {
-    server: ['@babel/polyfill', '../src/server/server.js']
+    server: ['@babel/polyfill', './src/server/server.js']
   },
   output: {
     ...config.output,

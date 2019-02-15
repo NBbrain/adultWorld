@@ -124,7 +124,8 @@
   "scripts": {
     "start": "babel-node ./build/run start",
     "render": "babel-node ./build/run render",
-    "runServer": "babel-node ./build/run runServer"
+    "runServer": "babel-node ./build/run runServer",
+    "debug": "babel-node --inspect-brk ./build/run start"
   },
   "repository": {
     "type": "git",
