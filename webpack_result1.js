@@ -323,7 +323,7 @@
   "0257": (function(module, exports, __webpack_require__) {
     module.exports = __webpack_require__.p + "static/img/rule-icon.e19f270b.png";
   })
-}]
+})
 //@file: dist/chunk-vendors.js  通过push[path, {module}] 传入
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([
   ["chunk-vendors"],
