@@ -5,10 +5,24 @@ Tapable是webpack的核心工具，提供插件接口
 1. 使用：扩展Tapable对象，提供的钩子及钩子的类型；
 2. 使用钩子hooks 和 tap，插件可以以多种不同的方式运行；
 3. compiler hooks记录了 Tapable内在的钩子，指出哪些tap方法可用。
-4. 自定义钩子函数：tapable 中 SyncHook, SyncBailHook, SyncWaterfallHook, SyncLoopHook, AsyncParallelHook, AsyncParallelBailHook, AsyncSeriesHook, AsyncSeriesBailHook, AsyncSeriesWaterfallHook
+4. 自定义钩子函数：tapable 中
+
+  - SyncHook, SyncBailHook, SyncWaterfallHook 同步串行
+  - SyncLoopHook 同步循环
+  - AsyncParallelHook, AsyncParallelBailHook 异步并发
+  - AsyncSeriesHook, AsyncSeriesBailHook, AsyncSeriesWaterfallHook 异步串行
+  [https://juejin.im/post/5abf33f16fb9a028e46ec352]
+
+5. 使用：
 
 ```javascript
 const SyncHook = require('tapable').SyncHook;
+let queue = new SyncHook(['name']); // 构造函数接收一个可选参数字符串数组
+// 订阅，将回调函数添加到this.hooks队列
+queue.tap('1', callback(param)) // 1,用来标识订阅的函数
+queue.tap('2', callback)
+// 循环调用钩子
+queue.call('webpack','') // 发布的时候，触发订阅的函数，同时传入参数
 
 // 具有 `apply` 方法……
 if (compiler.hooks.myCustomHook) throw new Error('Already in use');
@@ -32,6 +46,20 @@ compiler.hooks.myCustomHook.call(a, b, c);
   - tapAsync 以异步的方式触发run钩子
   - tapPromise
 
+
+
+## webpack关键事件钩子
+
+- entry-option 初始化option
+- run 开始编译
+- make 从entry开始递归的分析依赖，对每个依赖模块进行build
+- before-resolve - after-resolve 对其中一个模块位置进行解析
+- build-module 开始构建 (build) 这个module,这里将使用文件对应的loader加载
+- normal-module-loader 对用loader加载完成的module(是一段js代码)进行编译,用 acorn 编译,生成ast抽象语法树。
+- program 开始对ast进行遍历，当遇到require等一些调用表达式时，触发call require事件的handler执行，收集依赖，并。如：AMDRequireDependenciesBlockParserPlugin等
+- seal 所有依赖build完成，下面将开始对chunk进行优化，比如合并,抽取公共模块,加hash
+- bootstrap 生成启动代码
+- emit 把各个chunk输出到结果文件
 
 ## 钩子 compiler提供的方法
 

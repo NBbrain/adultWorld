@@ -1,15 +1,15 @@
 
 // manifest.js
 (function(modules) {
-  // 根据moduleId, 将moreModules更新到modules
   window["webpackJsonp"] = function webpackJsonpCallback(chunkIds, moreModules, executeModules) {
     var moduleId, result;
+    // 将moreModules更新到modules
     for (moduleId in moreModules) {
       if (Object.prototype.hasOwnProperty.call(moreModules, moduleId)) {
         modules[moduleId] = moreModules[moduleId];
       }
     }
-    //
+    // 执行模块存在，则加载
     if (executeModules) {
       for (i = 0; i < executeModules.length; i++) {
         result = __webpack_require__(executeModules[i]);
@@ -17,22 +17,22 @@
     }
     return result;
   };
-  // 缓存容器
   var installedModules = {};
 
   function __webpack_require__(moduleId) {
-    // 缓存中存在，则直接返回它的exports
     if (installedModules[moduleId]) {
       return installedModules[moduleId].exports;
     }
     var module = installedModules[moduleId] = {
+      i: moduleId,
+      l: false,
       exports: {}
     };
-    // 调用该module，参数与每个module的相对应
+    // 执行当前模块
     modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
     return module.exports;
   }
-})([]);
+})([])
 // 单个chunk，([chunkId], {modules}, [moduleIds?]
 webpackJsonp([0], {
   "JkW7": (function(module, exports, __webpack_require__) {
@@ -47,7 +47,7 @@ webpackJsonp([0], {
 
 // 按需加载
 // index.js
-webpackJsonp([1], {
+webpackJsonp([0], {
   "JkW7":
     (function(module, exports, __webpack_require__) {
       const p = document.querySelector('.p');
@@ -55,6 +55,7 @@ webpackJsonp([1], {
 
       btn.addEventListener('click', function() {
         __webpack_require__.e(0).then((function() {
+          // resolve里，加载相应的模块
           const data = __webpack_require__("zFrx");
           p.innerHTML = data;
         }).bind(null, __webpack_require__)).catch(__webpack_require__.oe)
@@ -62,26 +63,28 @@ webpackJsonp([1], {
     })
 }, ["JkW7"]);
 
-// 已加载的chunk，key---moduleId, value---chunkId
+// 已加载的chunk
 var installedChunks = {
   2: 0
 };
 __webpack_require__.e = function requireEnsure(chunkId) {
   var installedChunkData = installedChunks[chunkId];
+  // installedChunkData = [resolve, reject, promise] 根据chunkId，如果是未加载的，则进行resolve
   if (installedChunkData === 0) {
     return new Promise(function(resolve) {
       resolve();
     });
 
   }
+  // 多次请求，返回同一个promise
   if (installedChunkData) {
     return installedChunkData[2];
   }
-
   var promise = new Promise(function(resolve, reject) {
     installedChunkData = installedChunks[chunkId] = [resolve, reject];
   });
   installedChunkData[2] = promise;
+  // 把script添加到页面
   var head = document.getElementsByTagName('head')[0];
   var script = document.createElement('script');
   script.src = "js/" + chunkId + "." + {
@@ -91,6 +94,7 @@ __webpack_require__.e = function requireEnsure(chunkId) {
   script.onerror = script.onload = onScriptComplete;
 
   function onScriptComplete() {
+    // js文件下载成功后，先执行内容，再执行onload方法
     script.onerror = script.onload = null;
     var chunk = installedChunks[chunkId];
     if (chunk !== 0) {
@@ -103,5 +107,4 @@ __webpack_require__.e = function requireEnsure(chunkId) {
   head.appendChild(script);
   return promise;
 };
-
 
