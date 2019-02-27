@@ -46,6 +46,9 @@ compiler.hooks.myCustomHook.call(a, b, c);
   - tapAsync 以异步的方式触发run钩子
   - tapPromise
 
+## 问题：
+1. Compiler类的实例对象hooks 及 hooks对象的属性
+2. .tap 或 .tapPromise 及 .tapAsync('identify', (source, target, routesList, callback)=>{}) 与 compiler.plugin('identify', callback) 的区别
 
 
 ## webpack关键事件钩子
@@ -61,7 +64,69 @@ compiler.hooks.myCustomHook.call(a, b, c);
 - bootstrap 生成启动代码
 - emit 把各个chunk输出到结果文件
 
-## 钩子 compiler提供的方法
+
+## 事件钩子执行顺序
+'before run'
+  'run'
+    compile:func//调用 compile() 函数
+        'before compile'
+           'compile'//(1)compiler 对象的第一阶段
+               newCompilation:object//创建 compilation 对象
+               'make' //(2)compiler 对象的第二阶段
+                    compilation.finish:func
+                       "finish-modules"
+                    compilation.seal
+                         "seal"
+                         "optimize"
+                         "optimize-modules-basic"
+                         "optimize-modules-advanced"
+                         "optimize-modules"
+                         "after-optimize-modules"//首先是优化模块
+                         "optimize-chunks-basic"
+                         "optimize-chunks"//然后是优化 chunk
+                         "optimize-chunks-advanced"
+                         "after-optimize-chunks"
+                         "optimize-tree"
+                            "after-optimize-tree"
+                            "should-record"
+                            "revive-modules"
+                            "optimize-module-order"
+                            "advanced-optimize-module-order"
+                            "before-module-ids"
+                            "module-ids"//首先优化 module-order，然后优化 module-id
+                            "optimize-module-ids"
+                            "after-optimize-module-ids"
+                            "revive-chunks"
+                            "optimize-chunk-order"
+                            "before-chunk-ids"//首先优化 chunk-order，然后 chunk-id
+                            "optimize-chunk-ids"
+                            "after-optimize-chunk-ids"
+                            "record-modules"//record module 然后 record chunk
+                            "record-chunks"
+                            "before-hash"
+                               compilation.createHash//func
+                                 "chunk-hash"//webpack-md5-hash
+                            "after-hash"
+                            "record-hash"//before-hash/after-hash/record-hash
+                            "before-module-assets"
+                            "should-generate-chunk-assets"
+                            "before-chunk-assets"
+                            "additional-chunk-assets"
+                            "record"
+                            "additional-assets"
+                                "optimize-chunk-assets"
+                                   "after-optimize-chunk-assets"
+                                   "optimize-assets"
+                                      "after-optimize-assets"
+                                      "need-additional-seal"
+                                         unseal:func
+                                           "unseal"
+                                      "after-seal"
+                    "after-compile"//(4)完成模块构建和编译过程（seal 函数回调）
+    "emit"//(5)compile 函数的回调，compiler 开始输出 assets，是改变 assets 最后机会
+    "after-emit"//(6)文件产生完成
+
+## 钩子 compiler.hooks提供的事件钩子
 
   - entryOption (SyncBailHook)：在 webpack 选项中的 entry 配置项 处理过之后，执行插件。
   - afterPlugins (SyncHook)：设置完初始插件之后，执行插件。 `参数：compiler`
@@ -98,7 +163,7 @@ class pluginName{
 ```
 
 
-## 钩子 compilation会被compiler用来创建新的编译；Compilation能够访问所有的模块及它们的依赖；对应用程序进行字面上的编译。提供的方法
+## compilation提供的事件钩子 compilation会被compiler用来创建新的编译；Compilation能够访问所有的模块及它们的依赖；对应用程序进行字面上的编译。提供的方法
 
 编译阶段会被`加载loaded`，`封存sealed`，`优化optimized`，`分块chunked`，`哈希hashed`，`重新创建restored`.
 
@@ -336,3 +401,19 @@ resolve: {
   /* 高级解析选项（点击展示） */
 },
 ```
+
+
+
+
+loader
+this.context：当前处理文件的所在目录，假如当前 Loader 处理的文件是 /src/main.js，则 this.context 就等于 /src。
+this.resource：当前处理文件的完整请求路径，包括 querystring，例如 /src/main.js?name=1。
+this.resourcePath：当前处理文件的路径，例如 /src/main.js。
+this.resourceQuery：当前处理文件的 querystring。
+this.target：等于 Webpack 配置中的 Target。
+this.loadModule：但 Loader 在处理一个文件时，如果依赖其它文件的处理结果才能得出当前文件的结果时， 就可以通过 this.loadModule(request: string, callback: function(err, source, sourceMap, module)) 去获得 request 对应文件的处理结果。
+this.resolve：像 require 语句一样获得指定文件的完整路径，使用方法为 resolve(context: string, request: string, callback: function(err, result: string))。
+this.addDependency：给当前处理文件添加其依赖的文件，以便再其依赖的文件发生变化时，会重新调用 Loader 处理该文件。使用方法为 addDependency(file: string)。
+this.addContextDependency：和 addDependency 类似，但 addContextDependency 是把整个目录加入到当前正在处理文件的依赖中。使用方法为 addContextDependency(directory: string)。
+this.clearDependencies：清除当前正在处理文件的所有依赖，使用方法为 clearDependencies()。
+this.emitFile：输出一个文件，使用方法为 emitFile(name: string, content: Buffer|string, sourceMap: {...})。

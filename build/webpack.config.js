@@ -8,7 +8,7 @@ import config from './common.webpack.config';
 import { resolve } from 'dns';
 import pkg from '../package.json';
 import overrideRules from './lib/overrideRules';
-
+import debugWebpackConfigPlugin from './plugin/debugWebpackCfg';
 
 const root_dir = path.resolve(__dirname, '..');
 const get_cur_dir = (...args)=>path.resolve(root_dir, ...args);  // 获取当前项目下的某个目录
@@ -19,6 +19,8 @@ const staticAssetName = isDebug ? '[path][name].[ext]?[hash:8]' : '[hash:8].[ext
 const imgRegexp = /\.(bmp|gif|jpg|jpeg|png|svg)$/;
 const jsRegexp = /\.(?:js|jsx|mjs)$/;
 const cssRegexp = /\.(?:css|less|scss)$/;
+
+
 
 const clientConfig = {
   ...config,
@@ -125,7 +127,7 @@ const serverConfig = {
             presets: rule.options.presets.map(preset => preset[0] !== '@babel/preset-env' ? preset : [
               '@babel/preset-env',
               {
-                target: {
+                targets: {
                   node: pkg.engines.node.match(/(\d+\.?)+/)[0],
                 },
                 modules: false,
@@ -168,6 +170,7 @@ const serverConfig = {
       raw: true,
       entryOnly: false,
     }),
+    new debugWebpackConfigPlugin()
   ],
   node: {
     console: false,

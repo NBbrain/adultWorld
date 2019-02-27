@@ -1,5 +1,36 @@
 {
   "plugins": [
-    "transform-es2015-modules-commonjs"
+    "transform-es2015-modules-commonjs",
+    "@babel/plugin-transform-react-constant-elements",
+    "@babel/plugin-transform-react-inline-elements",
+    "babel-plugin-transform-react-remove-prop-types",
+  ],
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "browsers": [
+            ">1%",
+            "last 4 versions",
+            "Firefox ESR",
+            "not ie < 9"
+          ],
+        },
+        "forceAllTransforms": false,
+        "modules": false,
+        "useBuiltIns": false,
+        "debug": false,
+      }
+    ],
+    [
+      "@babel/preset-stage-2",
+      {"decoratorsLegacy": true}
+    ],
+    "@babel/preset-flow",
+    [
+      "@babel/preset-react",
+      {"development": true}
+    ]
   ]
 }

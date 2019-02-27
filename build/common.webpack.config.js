@@ -43,35 +43,6 @@ let config = {
         options: {
           cacheDirectory: isDebug,
           babelrc: false,
-          presets: [
-            // 最新的js
-            [
-              '@babel/preset-env',
-              {
-                targets: {
-                  browsers: pkg.browserslist,
-                },
-                forceAllTransforms: !isDebug,
-                modules: false,
-                useBuiltIns: false,
-                debug: false,
-              }
-            ],
-            [
-              '@babel/preset-stage-2',
-              {decoratorsLegacy: true}
-            ],
-            '@babel/preset-flow',
-            [
-              '@babel/preset-react',
-              {development: isDebug}
-            ]
-          ],
-          plugins: [
-            ...(isDebug ? [] : ['@babel/transform-react-constant-elements']),
-            ...(isDebug ? [] : ['@babel/transform-react-inline-elements']),
-            ...(isDebug ? [] : ['transform-react-remove-prop-types']),
-          ],
         }
       },
       // 样式

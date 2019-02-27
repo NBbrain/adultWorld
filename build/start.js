@@ -95,13 +95,17 @@ async function start() {
 
   // Configure compilation
   await run(clean);
-  const multiCompiler = webpack(webpackConfig);
+  const multiCompiler = webpack(webpackConfig, (error, stats)=>{
+    let info = stats.toJson()
+    console.info(info.errors);
+  });
   const clientCompiler = multiCompiler.compilers.find(
     compiler => compiler.name === 'client',
   );
   const serverCompiler = multiCompiler.compilers.find(
     compiler => compiler.name === 'server',
   );
+
   const clientPromise = createCompilationPromise(
     'client',
     clientCompiler,
