@@ -1,11 +1,14 @@
 import UniversalRouter from 'universal-router'
 
+import home from './controller/home';
+
+
 // 定义路由并设置统一的动作，添加title与description
 const routes = [{
   path: '',
   children: [
     {
-      path: '',
+      path: '/',
       load: () => {
         if (__isClient__) {
           return import(/* webpackChunkName: 'home' */ './controller/home')
@@ -23,7 +26,7 @@ const routes = [{
       }
     }
   ],
-  async action({next})=> {
+  async action({next }) => {
     const route = await next();
     route.title = `${route.title || 'Untitled page'} - www.host.com`;
     route.description = route.description || '';
