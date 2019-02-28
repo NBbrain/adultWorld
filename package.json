@@ -3,6 +3,26 @@
   "version": "1.0.0",
   "description": "react isomorphism",
   "main": "index.js",
+  "scripts": {
+    "start": "babel-node ./build/run start",
+    "render": "babel-node ./build/run render",
+    "runServer": "babel-node ./build/run runServer",
+    "debug": "babel-node --inspect-brk ./build/run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NBbrain/adultWorld.git"
+  },
+  "keywords": [
+    "react",
+    "isomorphism"
+  ],
+  "author": "mengyue",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NBbrain/adultWorld/issues"
+  },
+  "homepage": "https://github.com/NBbrain/adultWorld#readme",
   "engines": {
     "node": ">=6.13.1",
     "npm": ">=3.10.10"
@@ -127,25 +147,5 @@
     "webpack-dev-middleware": "^3.1.3",
     "webpack-hot-middleware": "^2.22.2",
     "webpack-node-externals": "^1.7.2"
-  },
-  "scripts": {
-    "start": "babel-node ./build/run start",
-    "render": "babel-node ./build/run render",
-    "runServer": "babel-node ./build/run runServer",
-    "debug": "babel-node --inspect-brk ./build/run start"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/NBbrain/adultWorld.git"
-  },
-  "keywords": [
-    "react",
-    "isomorphism"
-  ],
-  "author": "mengyue",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/NBbrain/adultWorld/issues"
-  },
-  "homepage": "https://github.com/NBbrain/adultWorld#readme"
+  }
 }
