@@ -2,7 +2,7 @@ import react from 'react';
 import propTypes from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { hot } from 'react-hot-loader/root';
-import s from './home.less';
+import styles from './home.less';
 
 class Home extends react.Component{
   // static propTypes = {

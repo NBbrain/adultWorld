@@ -18,5 +18,18 @@
     "@babel/plugin-proposal-export-namespace-from",
     "@babel/plugin-proposal-numeric-separator",
     "@babel/plugin-proposal-throw-expressions"
-  ]
+  ],
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current",
+        },
+      },
+    ],
+    "@babel/preset-flow",
+    "@babel/preset-react",
+  ],
+  "ignore": ["node_modules", "build"],
 }

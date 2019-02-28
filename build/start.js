@@ -96,8 +96,9 @@ async function start() {
   // Configure compilation
   await run(clean);
   const multiCompiler = webpack(webpackConfig, (error, stats)=>{
-    let info = stats.toJson()
-    console.info(info.errors);
+    // console.log(stats && stats.toJson)
+    // let info = stats.toJson()
+    // console.info(info.errors);
   });
   const clientCompiler = multiCompiler.compilers.find(
     compiler => compiler.name === 'client',

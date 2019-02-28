@@ -14,3 +14,5 @@ async function action(){
     )
   }
 }
+
+export default action;

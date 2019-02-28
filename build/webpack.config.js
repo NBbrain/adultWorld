@@ -32,6 +32,7 @@ const clientConfig = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.BROWSER': true,
+      __isClient__: true,
       __DEV__: isDebug,
     }),
     // 生成manifest.json文件，在服务端使用

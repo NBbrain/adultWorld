@@ -67,6 +67,13 @@ let config = {
               }
             ]
           ],
+          plugins: [
+            ["@babel/plugin-proposal-decorators", { legacy: true }],
+            ["@babel/plugin-proposal-class-properties", { loose: true }],
+            ["@babel/plugin-transform-runtime"],
+            "@babel/plugin-syntax-dynamic-import",
+            "@babel/plugin-syntax-import-meta",
+          ],
           cacheDirectory: isDebug,
           babelrc: false,
         }
@@ -77,7 +84,12 @@ let config = {
         // css-loader用来解析处理css中的url路径，把css文件变成一个模块
         // style-loader把css文件变成style标签插入head
         rules: [
-          // 第三方样式
+          // 将样式加入到js模块内
+          {
+            issuer: {not: []},
+            use: 'isomorphic-style-loader'
+          },
+          //
           {
             include: get_cur_dir('src'),
             exclude: get_cur_dir('dist'),
@@ -103,7 +115,7 @@ let config = {
             loader: 'postcss-loader',
             options: {
               config: {
-                path: get_cur_dir('./postcss.config.js')
+                path: get_cur_dir('./build/postcss.config.js')
               }
             }
           }
