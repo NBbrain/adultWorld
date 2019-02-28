@@ -6,12 +6,12 @@ module.exports = class debugWebpackConfigPlugin {
   apply(compiler){
     compiler.hooks.compilation.tap(pluginName, (compilation)=>{
       compilation.hooks.succeedModule.tap(pluginName, (module)=>{
-        console.log(module);
-        console.log('============================');
+        // console.log(module);
+        // console.log('============================');
       })
       compilation.hooks.succeedModule.tap(pluginName, (module)=>{
-        console.log(module);
-        console.log('失败============================');
+        // console.log(module);
+        // console.log('失败============================');
       })
     })
   }

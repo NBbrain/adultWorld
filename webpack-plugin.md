@@ -48,7 +48,7 @@ compiler.hooks.myCustomHook.call(a, b, c);
 
 ## 问题：
 1. Compiler类的实例对象hooks 及 hooks对象的属性
-2. .tap 或 .tapPromise 及 .tapAsync('identify', (source, target, routesList, callback)=>{}) 与 compiler.plugin('identify', callback) 的区别
+2. .tap 或 .tapPromise 及 .tapAsync('identify', (source, target, routesList, callback)=>{}) 与 compiler.plugin('identify', callback) 的区别，只是语法糖？
 
 
 ## webpack关键事件钩子

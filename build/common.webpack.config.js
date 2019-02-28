@@ -41,6 +41,32 @@ let config = {
         exclude: get_cur_dir('dist'),
         loader: 'babel-loader',
         options: {
+          presets: [
+            [
+              "@babel/preset-env",
+              {
+                "targets": {
+                  "browsers": [
+                    ">1%",
+                    "last 4 versions",
+                    "Firefox ESR",
+                    "not ie < 9"
+                  ]
+                },
+                "forceAllTransforms": false,
+                "modules": false,
+                "useBuiltIns": false,
+                "debug": false
+              }
+            ],
+            "@babel/preset-flow",
+            [
+              "@babel/preset-react",
+              {
+                "development": true
+              }
+            ]
+          ],
           cacheDirectory: isDebug,
           babelrc: false,
         }
