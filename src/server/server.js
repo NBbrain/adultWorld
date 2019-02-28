@@ -13,7 +13,7 @@ import config from './config';
 import passport from './passport';
 import router from '../router'
 
-process.on('onhandleRejection', (reason, p)=>{
+process.on('onhandleRejection', (reason, p)=>{compression
   console.error('Unhandled Rejection at:', p, 'reason', reason);
   process.exit(1);
 })

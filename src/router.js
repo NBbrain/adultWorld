@@ -6,7 +6,21 @@ const routes = [{
   children: [
     {
       path: '',
-      load: () => import(/* webpackChunkName: 'home' */ './controller/home')
+      load: () => {
+        if (__isClient__) {
+          return import(/* webpackChunkName: 'home' */ './controller/home')
+        } else {
+          return require('./controller/home')
+        }
+    },{
+      path: '/about',
+      load: () => {
+        if (__isClient__) {
+          return import(/* webpackChunkName: 'about' */ './controller/about')
+        } else {
+          return require('./controller/about')
+        }
+      }
     }
   ],
   async action({next})=> {
