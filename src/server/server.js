@@ -163,7 +163,7 @@ if (!module.hot) {
 // -----------------------------------------------------------------------------
 if (module.hot) {
   app.hot = module.hot;
-  module.hot.accept('./router');
+  module.hot.accept('../router');
 }
 
 export default app;
