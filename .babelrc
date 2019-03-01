@@ -1,6 +1,5 @@
 {
   "plugins": [
-    "@babel/plugin-transform-modules-commonjs",
     "@babel/plugin-transform-react-constant-elements",
     "@babel/plugin-transform-react-inline-elements",
     "babel-plugin-transform-react-remove-prop-types",
@@ -9,6 +8,7 @@
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-proposal-json-strings",
     "@babel/plugin-transform-modules-commonjs",
+    "babel-plugin-transform-es2015-modules-commonjs",
     [
       "@babel/plugin-proposal-decorators",
       {

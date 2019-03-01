@@ -73,6 +73,8 @@ let config = {
             ["@babel/plugin-transform-runtime"],
             "@babel/plugin-syntax-dynamic-import",
             "@babel/plugin-syntax-import-meta",
+            "babel-plugin-transform-es2015-modules-commonjs",
+            "@babel/plugin-transform-modules-commonjs",
           ],
           cacheDirectory: isDebug,
           babelrc: false,

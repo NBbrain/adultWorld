@@ -1,6 +1,9 @@
 // 执行其他模块，主要添加的错误处理 及 执行信息
 // require('babel-register');
 
+require('babel-register') ({
+  presets: [ 'env' ]
+})
 export function format(time) {
   return time.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, '$1');
 }

@@ -28,4 +28,4 @@ require('babel-register') ({
 })
 module.exports = require('js')
 使用babel-node命令执行启动脚本脚本
-2. babel插件：transform-es2015-modules-commonjs
+2. babel插件：babel-plugin-transform-es2015-modules-commonjs，@babel/plugin-transform-modules-commonjs
