@@ -8,7 +8,7 @@ import config from './common.webpack.config';
 import { resolve } from 'dns';
 import pkg from '../package.json';
 import overrideRules from './lib/overrideRules';
-import debugWebpackConfigPlugin from './plugin/debugWebpackCfg';
+import sourceTree from './plugin/sourceTree';
 
 const root_dir = path.resolve(__dirname, '..');
 const get_cur_dir = (...args)=>path.resolve(root_dir, ...args);  // 获取当前项目下的某个目录
@@ -171,7 +171,7 @@ const serverConfig = {
       raw: true,
       entryOnly: false,
     }),
-    new debugWebpackConfigPlugin()
+    new sourceTree()
   ],
   node: {
     console: false,
