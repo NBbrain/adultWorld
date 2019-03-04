@@ -222,7 +222,7 @@ compiler.hooks.myCustomHook.call(a, b, c);
   "request": "launch",
   "name": "nodemon",
   "runtimeExecutable": "nodemon", // 以什么命令运算，"npm"
-  "args": ["${workspaceRoot}/bin/www"],
+  "args": ["${workspaceRoot}/bin/www"], // 启动目录
   "restart": true,
   "protocol": "inspector",    //调试协议：auto, legacy
   "address": "", // 调试TCP/IP地址

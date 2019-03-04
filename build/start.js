@@ -27,6 +27,9 @@ function createCompilationPromise(name, compiler, config) {
       console.info(`[${format(timeStart)}] Compiling '${name}'...`);
     });
 
+    compiler.hooks.compilation.tap(name, (compilation)=>{
+      console.info(compilation.getStatus().toJson().assets);
+    });
     compiler.hooks.done.tap(name, stats => {
       console.info(stats.toString(config.stats));
       const timeEnd = new Date();
