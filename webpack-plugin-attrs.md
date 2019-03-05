@@ -214,50 +214,6 @@ compiler.hooks.myCustomHook = new SyncHook(['a', 'b', 'c']);
 compiler.hooks.myCustomHook.call(a, b, c);
 ```
 
-## vscode 调试node
-
-```json
-{
-  "type": "node",
-  "request": "launch",
-  "name": "nodemon",
-  "runtimeExecutable": "nodemon", // 以什么命令运算，"npm"
-  "args": ["${workspaceRoot}/bin/www"], // 启动目录
-  "sourceMapPathOverrides": {
-
-  },
-  "internalConsoleOptions": "neverOpen",
-  "env": {"NODE_ENV": "production"},
-  "evnFile": "xx.env",
-  "skipFiles":[],
-  "preLanchTask": "debug", //task.json中的名字
-  "restart": true,
-  "protocol": "inspector",    //调试协议：auto, legacy
-  "address": "", // 调试TCP/IP地址
-  "stopOnEntry": "", // 程序启动时立即中断
-  "localRoot": "", // vscode的根目录
-  "remoteRoot": "", // node根目录
-  "webRoot": "",
-  "sourceMaps": true,
-  "console": "integratedTerminal",
-  "internalConsoleOptions": "neverOpen",
-  "runtimeArgs": [    //对应nodemon --inspect之后除了启动文件之外的其他配置
-    "--exec",
-    "babel-node",
-    "--presets",
-    "env"
-  ],
-  "cwd": "${workspaceFolder}", // 程序启动目录
-  "runtimeArgs": ["run-script", "start"], // 参数
-  "program": "${workspaceFolder}/build/webpack.config.babel.js",
-  "port": 9229,
-  "timeout": 60000,
-  "restart": true,
-  "processId": "${command:PickProcess}",
-  "sourceMaps": true
-}
-```
-
 ## webpack 处理的内容包含
 
 - 入口：构建依赖图的开始，找出相应依赖的模块与library；单入口、多入口、公共文件

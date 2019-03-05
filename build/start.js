@@ -31,6 +31,7 @@ function createCompilationPromise(name, compiler, config) {
       console.info(compilation.getStatus().toJson().assets);
     });
     compiler.hooks.done.tap(name, stats => {
+      console.log(name);
       console.info(stats.toString(config.stats));
       const timeEnd = new Date();
       const time = timeEnd.getTime() - timeStart.getTime();
@@ -99,9 +100,8 @@ async function start() {
   // Configure compilation
   await run(clean);
   const multiCompiler = webpack(webpackConfig, (error, stats)=>{
-    // console.log(stats && stats.toJson)
-    // let info = stats.toJson()
-    // console.info(info.errors);
+    let info = stats && stats.toJson()
+    console.info(info && info.errors);
   });
   const clientCompiler = multiCompiler.compilers.find(
     compiler => compiler.name === 'client',
@@ -123,9 +123,13 @@ async function start() {
 
   // https://github.com/webpack/webpack-dev-middleware
   // client server启用webpack中间件，将webpack编译结果。。。
+  server.use(webpackDevMiddleware(clientCompiler, {
+    publicPath: '/',
+  }));
   server.use(
     webpackDevMiddleware(clientCompiler, {
       publicPath: clientConfig.output.publicPath,
+      writeToDisk: true,
       logLevel: 'silent',
       watchOptions,
     }),
@@ -133,106 +137,136 @@ async function start() {
 
   // https://github.com/glenjamin/webpack-hot-middleware
   // client server热更新
-  server.use(webpackHotMiddleware(clientCompiler, { log: false }));
+  server.use(webpackHotMiddleware(clientCompiler, {
+    log: false,
+  }));
 
-  let appPromise;
-  let appPromiseResolve;
-  let appPromiseIsResolved = true;
-  serverCompiler.hooks.compile.tap('server', () => {
-    if (!appPromiseIsResolved) return;
-    appPromiseIsResolved = false;
-    // eslint-disable-next-line no-return-assign
-    appPromise = new Promise(resolve => (appPromiseResolve = resolve));
-  });
+  serverCompiler.hooks.done.tap('server', stats => {
+    purgeCache(('./dist/server'));
+  })
 
-  let app;
-  server.use((req, res) => {
-    appPromise
-      .then(() => app.handle(req, res))
-      .catch(error => console.error(error));
-  });
-
-  function checkForUpdate(fromUpdate) {
-    const hmrPrefix = '[\x1b[35mHMR\x1b[0m] ';
-    if (!app.hot) {
-      throw new Error(`${hmrPrefix}Hot Module Replacement is disabled.`);
-    }
-    if (app.hot.status() !== 'idle') {
-      return Promise.resolve();
-    }
-    return app.hot
-      .check(true)
-      .then(updatedModules => {
-        if (!updatedModules) {
-          if (fromUpdate) {
-            console.info(`${hmrPrefix}Update applied.`);
-          }
-          return;
-        }
-        if (updatedModules.length === 0) {
-          console.info(`${hmrPrefix}Nothing hot updated.`);
-        } else {
-          console.info(`${hmrPrefix}Updated modules:`);
-          updatedModules.forEach(moduleId =>
-            console.info(`${hmrPrefix} - ${moduleId}`),
-          );
-          checkForUpdate(true);
-        }
-      })
-      .catch(error => {
-        if (['abort', 'fail'].includes(app.hot.status())) {
-          console.warn(`${hmrPrefix}Cannot apply update.`);
-          delete require.cache[require.resolve('../dist/server')];
-          // eslint-disable-next-line global-require, import/no-unresolved
-          app = require('../dist/server').default;
-          console.warn(`${hmrPrefix}App has been reloaded.`);
-        } else {
-          console.warn(
-            `${hmrPrefix}Update failed: ${error.stack || error.message}`,
-          );
-        }
-      });
+  function purgeCache(moduleName){
+    searchCache(moduleName, function(mod){
+      delete require.cache[mod.id];
+    });
+    Object.keys(module.constructor._pathCache).forEach((cacheKey)=>{
+      if(cacheKey.indexOf(moduleName)>0){
+        delete module.constructor._pathCache[cacheKey];
+      }
+    })
   }
-
-  serverCompiler.watch(watchOptions, (error, stats) => {
-    if (app && !error && !stats.hasErrors()) {
-      checkForUpdate().then(() => {
-        appPromiseIsResolved = true;
-        appPromiseResolve();
-      });
+  function searchCache(moduleName, callback){
+    let mod = require.resolve(moduleName);
+    if(mod && ((mod = require.cache[mod]) !== undefined)){
+      (function traverse(mod){
+        mod.children.forEach((child)=>{
+          traverse(child);
+        })
+        callback(mod);
+      })(mod)
     }
+  }
+  server.listen(3000, function () {
+    console.log(`app start: http://localhost:3000`)
   });
-  // Wait until both client-side and server-side bundles are ready
-  await clientPromise;
-  await serverPromise;
+  // let appPromise;
+  // let appPromiseResolve;
+  // let appPromiseIsResolved = true;
+  // serverCompiler.hooks.compile.tap('server', () => {
+  //   if (!appPromiseIsResolved) return;
+  //   appPromiseIsResolved = false;
+  //   // eslint-disable-next-line no-return-assign
+  //   appPromise = new Promise(resolve => (appPromiseResolve = resolve));
+  // });
 
-  const timeStart = new Date();
-  console.info(`[${format(timeStart)}] Launching server...`);
+  // let app;
+  // server.use((req, res) => {
+  //   appPromise
+  //     .then(() => app.handle(req, res))
+  //     .catch(error => console.error(error));
+  // });
 
-  // Load compiled src/server.js as a middleware
-  // eslint-disable-next-line global-require, import/no-unresolved
-  // ???
-  app = require('../dist/server').default;
-  appPromiseIsResolved = true;
-  appPromiseResolve();
+  // function checkForUpdate(fromUpdate) {
+  //   const hmrPrefix = '[\x1b[35mHMR\x1b[0m] ';
+  //   if (!app.hot) {
+  //     throw new Error(`${hmrPrefix}Hot Module Replacement is disabled.`);
+  //   }
+  //   if (app.hot.status() !== 'idle') {
+  //     return Promise.resolve();
+  //   }
+  //   return app.hot
+  //     .check(true)
+  //     .then(updatedModules => {
+  //       if (!updatedModules) {
+  //         if (fromUpdate) {
+  //           console.info(`${hmrPrefix}Update applied.`);
+  //         }
+  //         return;
+  //       }
+  //       if (updatedModules.length === 0) {
+  //         console.info(`${hmrPrefix}Nothing hot updated.`);
+  //       } else {
+  //         console.info(`${hmrPrefix}Updated modules:`);
+  //         updatedModules.forEach(moduleId =>
+  //           console.info(`${hmrPrefix} - ${moduleId}`),
+  //         );
+  //         checkForUpdate(true);
+  //       }
+  //     })
+  //     .catch(error => {
+  //       if (['abort', 'fail'].includes(app.hot.status())) {
+  //         console.warn(`${hmrPrefix}Cannot apply update.`);
+  //         delete require.cache[require.resolve('../dist/server')];
+  //         // eslint-disable-next-line global-require, import/no-unresolved
+  //         app = require('../dist/server').default;
+  //         console.warn(`${hmrPrefix}App has been reloaded.`);
+  //       } else {
+  //         console.warn(
+  //           `${hmrPrefix}Update failed: ${error.stack || error.message}`,
+  //         );
+  //       }
+  //     });
+  // }
 
-  // Launch the development server with Browsersync and HMR
-  await new Promise((resolve, reject) =>
-    browserSync.create().init(
-      {
-        // https://www.browsersync.io/docs/options
-        server: 'src/server/server.js',
-        middleware: [server],
-        open: !process.argv.includes('--silent'),
-        ...(isDebug ? {} : { notify: false, ui: false }),
-      },
-      (error, bs) => {return (error ? reject(error) : resolve(bs))},
-    ),
-  );
+  // serverCompiler.watch(watchOptions, (error, stats) => {
+  //   if (app && !error && !stats.hasErrors()) {
+  //     checkForUpdate().then(() => {
+  //       appPromiseIsResolved = true;
+  //       appPromiseResolve();
+  //     });
+  //   }
+  // });
+  // // Wait until both client-side and server-side bundles are ready
+  // await clientPromise;
+  // await serverPromise;
 
-  const timeEnd = new Date();
-  const time = timeEnd.getTime() - timeStart.getTime();
-  console.info(`[${format(timeEnd)}] Server launched after ${time} ms`);
+  // const timeStart = new Date();
+  // console.info(`[${format(timeStart)}] Launching server...`);
+
+  // // Load compiled src/server.js as a middleware
+  // // eslint-disable-next-line global-require, import/no-unresolved
+  // // ??? 未输出server
+  // app = require('../dist/server').default;
+  // appPromiseIsResolved = true;
+  // appPromiseResolve();
+
+  // // Launch the development server with Browsersync and HMR
+  // await new Promise((resolve, reject) =>
+  //   browserSync.create().init(
+  //     {
+  //       // https://www.browsersync.io/docs/options
+  //       server: 'src/server/server.js',
+  //       middleware: [server],
+  //       open: !process.argv.includes('--silent'),
+  //       ...(isDebug ? {} : { notify: false, ui: false }),
+  //     },
+  //     (error, bs) => {return (error ? reject(error) : resolve(bs))},
+  //   ),
+  // );
+
+  // const timeEnd = new Date();
+  // const time = timeEnd.getTime() - timeStart.getTime();
+  // console.info(`[${format(timeEnd)}] Server launched after ${time} ms`);
   return server;
 }
 

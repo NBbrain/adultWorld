@@ -16,8 +16,10 @@
       "name": "webpack build",
       "cwd": "${workspaceFolder}/adultWorld",
       "runtimeExecutable": "npm",
-      "program": "${workspaceFolder}/adultWorld/build/run.js",
-      "runtimeArgs": ["run-script", "start"],
+      // "program": "${workspaceFolder}/adultWorld/build/run.js",
+      "runtimeArgs": [
+        "run-script", "start"
+      ],
     }
   ]
 }

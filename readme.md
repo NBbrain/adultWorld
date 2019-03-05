@@ -29,3 +29,54 @@ require('babel-register') ({
 module.exports = require('js')
 使用babel-node命令执行启动脚本脚本
 2. babel插件：babel-plugin-transform-es2015-modules-commonjs，@babel/plugin-transform-modules-commonjs
+
+
+## vscode调试
+
+## vscode 调试node
+node.js解析js通过懒加载模式，所以调试时加上--nolazy选项
+```json
+{
+    "type": "node",
+    "request": "launch",
+    "name": "nodemon",
+    "runtimeExecutable": "nodemon", // 以什么命令运算，"npm"
+    "args": ["${workspaceRoot}/bin/www"], // 启动目录
+    "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/*"
+    },
+    "outDir": null, // 尝试在输出目录找到与源码中相应位置来映射
+    "internalConsoleOptions": "neverOpen", //内部控制台
+    "evnFile": "xx.env",
+    "skipFiles":[],
+    "preLanchTask": "debug", //调试开始前要执行的任务，在task.json中的名字
+    "restart": true,
+    "protocol": "inspector",    //调试协议：auto, legacy
+    "address": "", // 调试TCP/IP地址，远程调试
+    "stopOnEntry": "", // 程序启动时立即中断
+    "breakOnLoad": false,
+    "localRoot": "", // vscode的根目录，映射远程与本地
+    "remoteRoot": "", // node根目录，映射远程与本地
+    "webRoot": "",
+    "sourceMaps": true,
+    "console": "integratedTerminal",
+    "runtimeArgs": [    //对应nodemon --inspect之后除了启动文件之外的其他配置
+    "--exec",
+    "babel-node",
+    "--presets",
+    "env"
+    ],
+    "cwd": "${workspaceFolder}", // 程序启动目录
+    "runtimeArgs": ["run-script", "start"], // 参数
+    "program": "${workspaceFolder}/build/webpack.config.babel.js",
+    "port": 9229,
+    "timeout": 60000,
+    "restart": true,
+    "processId": "${command:PickProcess}",
+    "sourceMaps": true,
+    "env":{
+        "NODE_ENV": "development"
+    },
+    "externalConsole": true  //使用外部控制台
+}
+```
